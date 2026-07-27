@@ -65,18 +65,24 @@ final class PluginManager {
 
         URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
             guard let self = self else { return }
-            defer { self.isFetchingCloud = false }
 
             if let error = error {
-                self.cloudPluginError = error.localizedDescription
+                DispatchQueue.main.async {
+                    self.isFetchingCloud = false
+                    self.cloudPluginError = error.localizedDescription
+                }
                 return
             }
             guard let data = data, let ids = try? JSONDecoder().decode([String].self, from: data) else {
-                self.cloudPluginError = "Failed to parse plugin index"
+                DispatchQueue.main.async {
+                    self.isFetchingCloud = false
+                    self.cloudPluginError = "Failed to parse plugin index"
+                }
                 return
             }
 
             let group = DispatchGroup()
+            let lock = NSLock()
             var fetched: [Plugin] = []
 
             for id in ids {
@@ -86,7 +92,9 @@ final class PluginManager {
                     if let d = d, let p = try? JSONDecoder().decode(Plugin.self, from: d) {
                         var plugin = p
                         plugin.directory = id
+                        lock.lock()
                         fetched.append(plugin)
+                        lock.unlock()
                     }
                     group.leave()
                 }.resume()
@@ -94,6 +102,7 @@ final class PluginManager {
 
             group.notify(queue: .main) {
                 self.cloudPlugins = fetched.sorted { $0.name < $1.name }
+                self.isFetchingCloud = false
                 if fetched.isEmpty {
                     self.cloudPluginError = "No plugins found"
                 }
