@@ -13,7 +13,7 @@ final class PluginManager {
     private var wordCache: Set<String> = []
     private var pluginSettings: [String: [String: String]] = [:]
 
-    private let cloudRepoURL = "https://raw.githubusercontent.com/laguser/ink-plugins/main/plugins"
+    private let cloudRepoURL = "https://raw.githubusercontent.com/laguser/ink-plugins/main/plugins.json"
 
     static let shared = PluginManager()
 
@@ -57,7 +57,7 @@ final class PluginManager {
         isFetchingCloud = true
         cloudPluginError = nil
 
-        guard let url = URL(string: "\(cloudRepoURL)/index.json") else {
+        guard let url = URL(string: cloudRepoURL) else {
             isFetchingCloud = false
             cloudPluginError = "Invalid URL"
             return
@@ -73,37 +73,21 @@ final class PluginManager {
                 }
                 return
             }
-            guard let data = data, let ids = try? JSONDecoder().decode([String].self, from: data) else {
+
+            guard let data = data,
+                  let plugins = try? JSONDecoder().decode([Plugin].self, from: data)
+            else {
                 DispatchQueue.main.async {
                     self.isFetchingCloud = false
-                    self.cloudPluginError = "Failed to parse plugin index"
+                    self.cloudPluginError = "Failed to parse plugins"
                 }
                 return
             }
 
-            let group = DispatchGroup()
-            let lock = NSLock()
-            var fetched: [Plugin] = []
-
-            for id in ids {
-                group.enter()
-                let pluginURL = URL(string: "\(self.cloudRepoURL)/\(id)/plugin.json")!
-                URLSession.shared.dataTask(with: pluginURL) { d, _, _ in
-                    if let d = d, let p = try? JSONDecoder().decode(Plugin.self, from: d) {
-                        var plugin = p
-                        plugin.directory = id
-                        lock.lock()
-                        fetched.append(plugin)
-                        lock.unlock()
-                    }
-                    group.leave()
-                }.resume()
-            }
-
-            group.notify(queue: .main) {
-                self.cloudPlugins = fetched.sorted { $0.name < $1.name }
+            DispatchQueue.main.async {
+                self.cloudPlugins = plugins.sorted { $0.name < $1.name }
                 self.isFetchingCloud = false
-                if fetched.isEmpty {
+                if plugins.isEmpty {
                     self.cloudPluginError = "No plugins found"
                 }
             }
