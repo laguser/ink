@@ -206,7 +206,7 @@ final class TypewriterCoreTextView: NSTextView {
     override func insertText(_ string: Any, replacementRange: NSRange) {
         super.insertText(string, replacementRange: replacementRange)
         animateTyping()
-        let loc = replacementRange.location + ((string as? NSString)?.length ?? 0)
+        let loc = selectedRange().location
         PluginManager.shared.emitParticles(at: self, cursor: loc)
     }
 

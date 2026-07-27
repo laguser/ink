@@ -191,7 +191,11 @@ final class PluginManager {
 
     func emitParticles(at textView: NSTextView, cursor location: Int) {
         guard isPluginEnabled("particles"), let layer = textView.layer else { return }
-        let rect = textView.firstRect(forCharacterRange: NSRange(location: location, length: 0), actualRange: nil)
+        let len = (textView.string as NSString).length
+        guard len > 0, location != NSNotFound else { return }
+        let safeLoc = min(max(location, 0), len - 1)
+        let rect = textView.firstRect(forCharacterRange: NSRange(location: safeLoc, length: 0), actualRange: nil)
+        guard rect != .zero else { return }
         let windowRect = textView.window?.convertFromScreen(rect) ?? .zero
         let viewRect = textView.convert(windowRect, from: nil)
 

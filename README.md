@@ -1,70 +1,87 @@
-
-![Ink](https://img.shields.io/badge/Ink-markdown%20editor-1d1d1f?style=flat-square)
-![macOS](https://img.shields.io/badge/macOS-14%2B-lightgrey?style=flat-square)
-![Swift](https://img.shields.io/badge/Swift-5.9-orange?style=flat-square)
-
 <p align="center">
-  <img src="https://img.shields.io/badge/✍%20Minimalist%20Markdown%20Editor-1d1d1f?style=for-the-badge" alt="Ink">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="github/icon.png">
+    <img src="github/icon.png" width="96" alt="Ink">
+  </picture>
 </p>
 
-<div align="center">
+<h1 align="center">Ink</h1>
 
-**Ink** is a minimalist, distraction-free Markdown editor for macOS.  
-Built with SwiftUI and AppKit. No chrome, no clutter — just you and your words.
+<p align="center">
+  <b>Minimalist Markdown Editor for macOS</b><br>
+  <sub>No chrome. No clutter. Just you and your words.</sub>
+</p>
 
-</div>
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-14%2B-lightgrey?style=flat-square">
+  <img src="https://img.shields.io/badge/Swift-5.9-orange?style=flat-square">
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square">
+  <img src="https://img.shields.io/badge/release-v1.0.0-black?style=flat-square">
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#download">Download</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#keyboard-shortcuts">Shortcuts</a> •
+  <a href="#plugin-api">Plugins</a> •
+  <a href="#building-from-source">Build</a>
+</p>
+
+---
+
+## Download
+
+[**Download Ink.dmg**](https://github.com/laguser/ink/releases/latest/download/Ink.dmg) — macOS 14+, Intel & Apple Silicon
+
+Or build from source (see below).
 
 ---
 
 ## Features
 
-- **Distraction-free writing** — hidden title bar, full-size content view, no tabs
-- **Programmatic keyboard sounds** — synthetic click sounds (like iOS keyboard) with adjustable pitch, duration, and noise
-- **Live Markdown preview** — rendered in a WKWebView with proper styling (headings, bold, italic, lists, code blocks, quotes, tables, links, images)
-- **Workspace management** — multiple workspaces, each is a plain folder of `.md` files
-- **Plugin system** — extend functionality with local plugins (Auto Complete, Word Highlighter)
-- **Language support** — English, Russian, Japanese (switched in Settings)
-- **Custom cursor** — block / line / underline with pixel editor, adjustable width and colour
-- **Export** — TXT, PDF, Markdown with folder export
-- **Animation** — configurable slide / fade / scale animation for document switching
-- **Keyboard shortcuts** — fully customizable in Settings → Shortcuts
+| | |
+|---|---|
+| ✍️ **Distraction-free** | Hidden title bar, full-width editor, no tabs |
+| 🎹 **Keyboard sounds** | Synthetic clicks (like iOS keyboard) — adjustable pitch, duration, noise |
+| 👁️ **Live Preview** | WKWebView renders headings, lists, code, tables, quotes |
+| 📁 **Workspaces** | Plain folders of `.md` files — switch, create, open in Finder |
+| 🧩 **Plugin system** | Auto Complete, Word Highlighter, Focus Mode, Particles & more |
+| 🌍 **i18n** | English, Русский, 日本語 — switch in Settings |
+| ⌨️ **Custom shortcuts** | Remap every action in Settings → Shortcuts |
+| 🎨 **Animations** | Slide / Fade / Scale transitions between documents |
+| 📦 **Export** | TXT, PDF, Markdown — single or batch |
 
 ---
 
 ## Screenshots
 
-*Coming soon — the app is in active development.*
+*Coming soon.*
 
 ---
 
 ## Quick Start
 
-1. Clone and build:
-   ```bash
-   git clone https://github.com/your-username/ink.git
-   cd ink
-   swift build
-   ```
+```bash
+git clone https://github.com/laguser/ink.git
+cd ink
+swift run
+```
 
-2. Or run directly:
-   ```bash
-   swift run
-   ```
-
-3. On first launch, Ink will ask you to choose a workspace folder.  
-   All notes are saved as plain `.md` files in that folder.
+On first launch, Ink will ask you to create or choose a workspace folder.  
+Documents are saved as `{Title}.md` in that folder.
 
 ---
 
 ## Keyboard Shortcuts
 
-| Shortcut               | Action              | Customisable |
-|------------------------|---------------------|:------------:|
-| `⌘N`                  | New Document        | ✅           |
-| `⌘S`                  | Save                | ✅           |
-| `⌘,`                  | Settings            | ✅           |
-| `⌘⇧P`                 | Toggle Preview      | ✅           |
-| `⌘⇧S`                 | Toggle Sidebar      | ✅           |
+| Shortcut | Action | Customisable |
+|---|---|---|
+| `⌘N` | New Document | ✅ |
+| `⌘S` | Save | ✅ |
+| `⌘,` | Settings | ✅ |
+| `⌘⇧P` | Toggle Preview | ✅ |
+| `⌘⇧S` | Toggle Sidebar | ✅ |
 
 All shortcuts are remappable in **Settings → Shortcuts**.
 
@@ -72,12 +89,15 @@ All shortcuts are remappable in **Settings → Shortcuts**.
 
 ## Plugin API
 
-Ink supports a plugin system. Plugins are stored in `{workspace}/plugins/{id}/plugin.json`.
+Plugins live in `{workspace}/plugins/{id}/plugin.json`.
 
-| Plugin              | Description                                      |
-|---------------------|--------------------------------------------------|
-| **Auto Complete**   | Suggests word completions as you type (Tab/Enter to navigate) |
-| **Word Highlighter**| Highlights all occurrences of a selected word with yellow |
+| Plugin | Description |
+|---|---|
+| **Auto Complete** | Suggests word completions as you type (Tab/Enter to navigate) |
+| **Word Highlighter** | Highlights all occurrences of a selected word |
+| **Auto Capitalize** | Capitalizes first letter after `.`, `!`, `?` |
+| **Focus Mode** | Highlights current line, dims the rest |
+| **Particles** | Colored particle burst on each keystroke |
 
 Full API reference → [`github/PLUGIN_API.md`](github/PLUGIN_API.md)
 
@@ -87,61 +107,60 @@ Full API reference → [`github/PLUGIN_API.md`](github/PLUGIN_API.md)
 
 Workspaces are plain directories of Markdown files. You can:
 
-- **Create** a new workspace on first launch
+- **Create** one on first launch
 - **Add** an existing folder of `.md` files
 - **Switch** between workspaces from the sidebar footer
 - **Open in Finder** directly from the workspace menu
 - **Remove** a workspace from the list
 
-Documents are named after their title and saved as `{Title}.md`.
-
 ---
 
 ## Settings
 
-Access settings via `⌘,` or the menu.
-
-| Section       | Options                                                                 |
-|---------------|-------------------------------------------------------------------------|
-| General       | Font, font size, line height, auto-save, spell check, theme             |
-| Sound         | Volume, pitch, duration, noise, custom sound files per character type   |
-| Typography    | Line height, paragraph spacing                                          |
-| Animation     | Transition style (slide/fade/scale/none), duration (0.1–1.0s)           |
-| Cursor        | Shape (block/line/underline/custom), width, colour, pixel editor 8×16   |
-| Shortcuts     | Remap any keyboard shortcut                                             |
-| Plugins       | Enable/disable plugins                                                  |
-| Language      | English / Русский / 日本語                                              |
-| Export        | Export current document or all documents                                |
+| Section | Options |
+|---|---|
+| General | Font, size, line height, auto-save, spell check |
+| Sound | Volume, engine, frequency, duration, noise, custom samples |
+| Typography | Typeface, size, line spacing |
+| Animation | Style (slide/fade/scale/none), duration |
+| Shortcuts | Remap any keyboard shortcut with recording UI |
+| Plugins | Enable/disable, configure per-plugin settings |
+| Language | English / Русский / 日本語 |
+| Export | TXT, PDF, Markdown — single or all documents |
 
 ---
 
 ## Building from Source
 
 ```bash
-# Debug build
+# Debug
 swift build
 
-# Release build
+# Release
 swift build -c release
 
-# Run with build script
+# Run directly
+swift run
+
+# Or use the build script
 ./build_and_run.sh
 ```
 
 - **macOS 14+** required
-- No external dependencies — pure SwiftUI + AppKit
+- **No external dependencies** — pure SwiftUI + AppKit
 
 ---
 
 ## Tech Stack
 
-| Layer   | Technology               |
-|---------|--------------------------|
-| UI      | SwiftUI + AppKit hybrid  |
-| Editor  | NSTextView subclass      |
-| Preview | WKWebView + custom Markdown→HTML converter |
+| Layer | Technology |
+|---|---|
+| UI | SwiftUI + AppKit hybrid |
+| Editor | `NSTextView` subclass with typewriter animations |
+| Preview | `WKWebView` + custom Markdown→HTML converter |
 | Storage | JSON (`Application Support/Ink/`) + plain `.md` files |
-| Sounds  | Programmatic sine-wave synthesis (CoreAudio) |
+| Sounds | Programmatic sine-wave synthesis (CoreAudio) |
+| Plugins | JSON-based local plugin system with ColorPicker, Actions, Settings |
 
 ---
 
@@ -151,6 +170,6 @@ MIT © Nicolay
 
 ---
 
-<div align="center">
+<p align="center">
   <sub>Built with ❤️ for people who love to write.</sub>
-</div>
+</p>
