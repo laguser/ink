@@ -21,7 +21,6 @@
   <a href="https://github.com/laguser/ink/releases/latest">
     <img src="https://img.shields.io/badge/release-v1.0.0-black?style=flat-square">
   </a>
-  <img src="https://img.shields.io/badge/download-2.2K-brightgreen?style=flat-square">
 </p>
 
 <p align="center">
