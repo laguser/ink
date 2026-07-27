@@ -23,9 +23,9 @@ final class PluginManager {
 
     func loadPlugins(from workspaceURL: URL) {
         let pluginsDir = workspaceURL.appendingPathComponent("plugins")
-        guard FileManager.default.fileExists(atPath: pluginsDir.path) else {
+        if !FileManager.default.fileExists(atPath: pluginsDir.path) {
             try? FileManager.default.createDirectory(at: pluginsDir, withIntermediateDirectories: true)
-            seedDefaultPlugins(into: pluginsDir)
+            plugins = []
             return
         }
         var loaded: [Plugin] = []
@@ -40,10 +40,6 @@ final class PluginManager {
             plugin.enabled = savedEnabled ?? plugin.enabled
             loaded.append(plugin)
             loadSettings(for: plugin.id, from: entry)
-        }
-        if loaded.isEmpty {
-            seedDefaultPlugins(into: pluginsDir)
-            return
         }
         plugins = loaded
         rebuildActions()
@@ -126,6 +122,15 @@ final class PluginManager {
 
     func isCloudPluginInstalled(_ id: String) -> Bool {
         plugins.contains(where: { $0.id == id })
+    }
+
+    func needsUpdate(_ cloudPlugin: Plugin) -> Bool {
+        guard let local = plugins.first(where: { $0.id == cloudPlugin.id }) else { return false }
+        return local.version != cloudPlugin.version
+    }
+
+    func updateCloudPlugin(_ plugin: Plugin) {
+        installCloudPlugin(plugin)
     }
 
     func saveEnabled(_ plugin: Plugin) {
@@ -386,8 +391,6 @@ final class PluginManager {
         return string
     }
 
-    // MARK: – Default plugins
-
     private func isPluginEnabled(_ id: String) -> Bool {
         plugins.first(where: { $0.id == id })?.enabled ?? false
     }
@@ -396,34 +399,6 @@ final class PluginManager {
         let words = text.components(separatedBy: CharacterSet.whitespacesAndNewlines.union(.punctuationCharacters))
             .filter { $0.count >= 2 }
         wordCache = Set(words)
-    }
-
-    private func seedDefaultPlugins(into pluginsDir: URL) {
-        let defaults: [Plugin] = [
-            Plugin(id: "autocomplete", name: "Auto Complete", description: "Suggests word completions as you type", icon: "text.insert", version: "1.0.0", enabled: true, type: .local, directory: "autocomplete", settingsSchema: nil, hasActions: false),
-            Plugin(id: "wordhighlighter", name: "Word Highlighter", description: "Highlights all occurrences of a selected word", icon: "highlighter", version: "1.0.0", enabled: true, type: .local, directory: "wordhighlighter", settingsSchema: [PluginSettingDefinition(key: "highlightColor", label: "Highlight color", type: .color, defaultValue: "#FFEB3B", options: nil)], hasActions: false),
-            Plugin(id: "autocapitalize", name: "Auto Capitalize", description: "Capitalizes first letter after period, paragraph, or at start of text", icon: "textformat.alt", version: "1.0.0", enabled: true, type: .local, directory: "autocapitalize", settingsSchema: nil, hasActions: false),
-            Plugin(id: "particles", name: "Particles", description: "Colored particle burst from cursor on each keystroke", icon: "sparkles", version: "1.0.0", enabled: false, type: .local, directory: "particles", settingsSchema: nil, hasActions: false),
-            Plugin(id: "focusmode", name: "Focus Mode", description: "Highlights current line, dims the rest", icon: "eye", version: "1.0.0", enabled: false, type: .local, directory: "focusmode", settingsSchema: nil, hasActions: false),
-        ]
-        for plugin in defaults {
-            let dir = pluginsDir.appendingPathComponent(plugin.directory)
-            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            if let data = try? JSONEncoder().encode(plugin),
-               let json = try? JSONSerialization.jsonObject(with: data),
-               let pretty = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
-                try? pretty.write(to: dir.appendingPathComponent("plugin.json"))
-            }
-            var p = plugin
-            let savedEnabled = UserDefaults.standard.object(forKey: "plugin_enabled_\(p.id)") as? Bool
-            p.enabled = savedEnabled ?? p.enabled
-        }
-        plugins = defaults.map { p in
-            var p = p
-            let savedEnabled = UserDefaults.standard.object(forKey: "plugin_enabled_\(p.id)") as? Bool
-            p.enabled = savedEnabled ?? p.enabled
-            return p
-        }
     }
 }
 

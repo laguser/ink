@@ -98,6 +98,22 @@ Plugins live in `{workspace}/plugins/{id}/plugin.json`.
 | **Auto Capitalize** | Capitalizes first letter after `.`, `!`, `?` |
 | **Focus Mode** | Highlights current line, dims the rest |
 | **Particles** | Colored particle burst on each keystroke |
+| **Typewriter Sounds** | Sound profiles: mechanical, typewriter, retro, soft |
+| **Text Stats** | Live word count, chars, readability, WPM |
+| **Daily Goal** | Track daily word count progress |
+| **Reading Time** | Estimated reading and speaking time |
+| **Smooth Scroll** | Animated scrolling with adjustable speed |
+| **Typewriter Scroll** | Keep current line vertically centered |
+| **Char Echo** | Animated trail on each keystroke |
+| **Word Rain** | Animated word rain background effect |
+| **Session Timer** | Pomodoro-style writing timer |
+| **Auto Backup** | Automatic versioned backups |
+| **Font Randomizer** | Random monospace font on new document |
+| **Writing Prompts** | Random prompts to fight writer's block |
+| **Focus Music** | Ambient soundscapes: lofi, rain, cafe |
+| **Zen Mode** | Combines Focus + Sounds + Smooth Scroll |
+| **Smart Quotes** | Curly quotes and em dashes |
+| **Inline Code** | Auto-style backtick-wrapped text |
 
 Full API reference → [`github/PLUGIN_API.md`](github/PLUGIN_API.md)
 

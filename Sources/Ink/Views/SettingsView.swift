@@ -507,15 +507,26 @@ struct SettingsView: View {
                 Text(plugin.description)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Text("v\(plugin.version)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
 
             Spacer()
 
             if PluginManager.shared.isCloudPluginInstalled(plugin.id) {
-                Button(tr("Installed")) { }
-                    .buttonStyle(.plain)
-                    .font(.caption)
-                    .foregroundStyle(.green)
+                if PluginManager.shared.needsUpdate(plugin) {
+                    Button(tr("Update")) {
+                        PluginManager.shared.updateCloudPlugin(plugin)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .tint(.orange)
+                } else {
+                    Text("✓")
+                        .foregroundStyle(.green)
+                        .font(.body)
+                }
                 Button(tr("Uninstall")) {
                     PluginManager.shared.uninstallCloudPlugin(plugin.id)
                 }
