@@ -6,9 +6,14 @@ final class PluginManager {
     var plugins: [Plugin] = []
     var actions: [PluginAction] = []
     var showPluginWindow: String?
+    var cloudPlugins: [Plugin] = []
+    var isFetchingCloud = false
+    var cloudPluginError: String?
 
     private var wordCache: Set<String> = []
     private var pluginSettings: [String: [String: String]] = [:]
+
+    private let cloudRepoURL = "https://raw.githubusercontent.com/laguser/ink-plugins/main/plugins"
 
     static let shared = PluginManager()
 
@@ -47,6 +52,80 @@ final class PluginManager {
     func reloadPlugins() {
         guard let url = WorkspaceManager.shared.activeWorkspace?.url else { return }
         loadPlugins(from: url)
+    }
+
+    // MARK: – Cloud Plugins
+
+    func fetchCloudPlugins() {
+        guard !isFetchingCloud else { return }
+        isFetchingCloud = true
+        cloudPluginError = nil
+
+        guard let url = URL(string: "\(cloudRepoURL)/index.json") else {
+            isFetchingCloud = false
+            cloudPluginError = "Invalid URL"
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+            guard let self = self else { return }
+            defer { self.isFetchingCloud = false }
+
+            if let error = error {
+                self.cloudPluginError = error.localizedDescription
+                return
+            }
+            guard let data = data, let ids = try? JSONDecoder().decode([String].self, from: data) else {
+                self.cloudPluginError = "Failed to parse plugin index"
+                return
+            }
+
+            let group = DispatchGroup()
+            var fetched: [Plugin] = []
+
+            for id in ids {
+                group.enter()
+                let pluginURL = URL(string: "\(self.cloudRepoURL)/\(id)/plugin.json")!
+                URLSession.shared.dataTask(with: pluginURL) { d, _, _ in
+                    if let d = d, let p = try? JSONDecoder().decode(Plugin.self, from: d) {
+                        var plugin = p
+                        plugin.directory = id
+                        fetched.append(plugin)
+                    }
+                    group.leave()
+                }.resume()
+            }
+
+            group.notify(queue: .main) {
+                self.cloudPlugins = fetched.sorted { $0.name < $1.name }
+                if fetched.isEmpty {
+                    self.cloudPluginError = "No plugins found"
+                }
+            }
+        }.resume()
+    }
+
+    func installCloudPlugin(_ plugin: Plugin) {
+        guard let url = WorkspaceManager.shared.activeWorkspace?.url else { return }
+        let dir = url.appendingPathComponent("plugins/\(plugin.directory)")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        if let data = try? JSONEncoder().encode(plugin),
+           let json = try? JSONSerialization.jsonObject(with: data),
+           let pretty = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
+            try? pretty.write(to: dir.appendingPathComponent("plugin.json"))
+        }
+        reloadPlugins()
+    }
+
+    func uninstallCloudPlugin(_ id: String) {
+        guard let url = WorkspaceManager.shared.activeWorkspace?.url else { return }
+        let dir = url.appendingPathComponent("plugins/\(id)")
+        try? FileManager.default.removeItem(at: dir)
+        reloadPlugins()
+    }
+
+    func isCloudPluginInstalled(_ id: String) -> Bool {
+        plugins.contains(where: { $0.id == id })
     }
 
     func saveEnabled(_ plugin: Plugin) {

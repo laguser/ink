@@ -403,15 +403,42 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.bordered)
                 }
-                SettingsGroup("") {
-                    HStack {
-                        Text(tr("Cloud Plugins"))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(tr("Coming Soon"))
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
+                SettingsGroup(tr("Cloud Plugins")) {
+                    if PluginManager.shared.cloudPlugins.isEmpty && !PluginManager.shared.isFetchingCloud {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(tr("Browse cloud plugins from the community repository."))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            HStack(spacing: 8) {
+                                Button(tr("Browse Cloud…")) {
+                                    PluginManager.shared.fetchCloudPlugins()
+                                }
+                                .buttonStyle(.bordered)
+                                if let err = PluginManager.shared.cloudPluginError {
+                                    Text(err)
+                                        .font(.caption)
+                                        .foregroundStyle(.red)
+                                }
+                            }
+                        }
+                    } else if PluginManager.shared.isFetchingCloud {
+                        HStack {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                            Text(tr("Loading…"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        ForEach(PluginManager.shared.cloudPlugins) { plugin in
+                            cloudPluginRow(plugin)
+                        }
+                        Button(tr("Refresh")) {
+                            PluginManager.shared.fetchCloudPlugins()
+                        }
+                        .buttonStyle(.plain)
+                        .font(.caption)
+                        .foregroundStyle(.tint)
                     }
                 }
             }
@@ -465,6 +492,45 @@ struct SettingsView: View {
             .padding(.vertical, 4)
         }
         .buttonStyle(.plain)
+    }
+
+    private func cloudPluginRow(_ plugin: Plugin) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: plugin.icon)
+                .font(.title3)
+                .foregroundStyle(.tint)
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(plugin.name)
+                    .font(.body)
+                Text(plugin.description)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            if PluginManager.shared.isCloudPluginInstalled(plugin.id) {
+                Button(tr("Installed")) { }
+                    .buttonStyle(.plain)
+                    .font(.caption)
+                    .foregroundStyle(.green)
+                Button(tr("Uninstall")) {
+                    PluginManager.shared.uninstallCloudPlugin(plugin.id)
+                }
+                .buttonStyle(.plain)
+                .font(.caption)
+                .foregroundStyle(.red)
+            } else {
+                Button(tr("Install")) {
+                    PluginManager.shared.installCloudPlugin(plugin)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+            }
+        }
+        .padding(.vertical, 4)
     }
 
     private func hasSettings(_ plugin: Plugin) -> Bool {
