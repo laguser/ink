@@ -1,42 +1,57 @@
 #!/bin/bash
-set -e
+set -eou pipefail
 
-APP_BUNDLE="/tmp/Ink.app"
+DIST_DIR="$(dirname "$0")/dist"
+APP_SRC="$(dirname "$0")/.build/release"
+APP_DIR="$DIST_DIR/Ink.app"
 
 echo "Building..."
-swift build
+swift build -c release
 
-echo "Packaging app bundle..."
-pkill -f "Ink" 2>/dev/null || true
-sleep 1
+echo "Creating .app bundle..."
+rm -rf "$APP_DIR"
+mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
 
-rm -rf "$APP_BUNDLE"
-mkdir -p "$APP_BUNDLE/Contents/MacOS" "$APP_BUNDLE/Contents/Resources"
+cp "$APP_SRC/Ink" "$APP_DIR/Contents/MacOS/Ink"
+chmod +x "$APP_DIR/Contents/MacOS/Ink"
 
-cp .build/arm64-apple-macosx/debug/Ink "$APP_BUNDLE/Contents/MacOS/Ink"
-cp Sources/Ink/Resources/Ink.icns "$APP_BUNDLE/Contents/Resources/Ink.icns"
-cp -r .build/arm64-apple-macosx/debug/Ink_Ink.bundle "$APP_BUNDLE/Contents/Resources/Ink_Ink.bundle"
+if [ -d "$APP_SRC/Ink_Ink.bundle" ]; then
+  cp -R "$APP_SRC/Ink_Ink.bundle/"* "$APP_DIR/Contents/Resources/"
+fi
 
-cat > "$APP_BUNDLE/Contents/Info.plist" <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleExecutable</key><string>Ink</string>
-    <key>CFBundleIdentifier</key><string>com.ink.app</string>
-    <key>CFBundleName</key><string>Ink</string>
-    <key>CFBundleDisplayName</key><string>Ink</string>
-    <key>CFBundlePackageType</key><string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>1.0</string>
-    <key>CFBundleVersion</key><string>1.0.0</string>
-    <key>LSMinimumSystemVersion</key><string>14.0</string>
-    <key>NSHighResolutionCapable</key><true/>
-    <key>CFBundleIconFile</key><string>Ink</string>
-    <key>LSApplicationCategoryType</key><string>public.app-category.productivity</string>
-</dict>
-</plist>
-PLIST
+# Generate Info.plist
+/usr/libexec/PlistBuddy -c "Add CFBundleExecutable string Ink" \
+  -c "Add CFBundleIdentifier string com.ink.app" \
+  -c "Add CFBundleName string Ink" \
+  -c "Add CFBundleVersion string 1.1.0" \
+  -c "Add CFBundleShortVersionString string 1.1.0" \
+  -c "Add CFBundlePackageType string APPL" \
+  -c "Add LSMinimumSystemVersion string 14.0" \
+  -c "Add NSHighResolutionCapable bool true" \
+  -c "Add CFBundleIconFile string Ink" \
+  "$APP_DIR/Contents/Info.plist" 2>/dev/null || true
 
-echo "Launching..."
-open "$APP_BUNDLE"
-echo "Done."
+echo "Creating DMG..."
+DMG_TMP="/tmp/ink-tmp.dmg"
+DMG_FINAL="$DIST_DIR/Ink.dmg"
+rm -f "$DMG_TMP" "$DMG_FINAL"
+
+hdiutil create -srcfolder "$DIST_DIR" -volname "Ink" -fs HFS+ -format UDRW -ov "$DMG_TMP"
+MOUNT=$(hdiutil attach -readwrite -noverify -noautoopen "$DMG_TMP" | grep "/Volumes/Ink" | sed 's/.*\/Volumes/\/Volumes/' | sed 's/ *$//' | head -1)
+
+rm -rf "$MOUNT/.DS_Store"
+ln -sf /Applications "$MOUNT/Applications"
+
+mkdir -p "$MOUNT/.background"
+if [ -f "$(dirname "$0")/github/dmg_bg.png" ]; then
+  cp "$(dirname "$0")/github/dmg_bg.png" "$MOUNT/.background/background.png"
+fi
+
+cp "$APP_DIR/Contents/Resources/Ink.icns" "$MOUNT/.VolumeIcon.icns" 2>/dev/null || true
+SetFile -a C "$MOUNT" 2>/dev/null || true
+
+hdiutil detach "$MOUNT" -quiet
+hdiutil convert "$DMG_TMP" -format UDZO -imagekey zlib-level=9 -o "$DMG_FINAL"
+rm -f "$DMG_TMP"
+
+echo "Done: $(ls -lh "$DMG_FINAL" | awk '{print $5}')"

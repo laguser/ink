@@ -383,6 +383,96 @@ final class PluginManager {
 
     // MARK: – Auto Capitalize
 
+    private let properNouns: Set<String> = {
+        let names = [
+            "Maria", "Ivan", "Alex", "John", "Jane", "Mike", "Sarah", "David", "Anna", "Peter",
+            "Elena", "James", "Mary", "Robert", "Lisa", "William", "Olga", "Dmitry", "Kate", "Paul",
+            "Sophia", "Daniel", "Emily", "Michael", "Emma", "Nikolay", "Egor", "Andrey", "Vladimir",
+            "Sergey", "Tatiana", "Natalia", "Eugene", "Yuri", "Katherine", "Alexander", "Margarita",
+            "Diana", "Roman", "Oleg", "Igor", "Valentina", "Veronika", "Konstantin", "Philip",
+            "Elizabeth", "Victoria", "George", "Charles", "Lydia", "Boris", "Leonid", "Stepan",
+            "Thomas", "Christopher", "Andrew", "Joseph", "Samuel", "Benjamin", "Henry", "Arthur",
+            "Julia", "Grace", "Chloe", "Zoe", "Hannah", "Lily", "Ruby", "Alice", "Lucy", "Maya",
+        ]
+        let countries = [
+            "Russia", "USA", "France", "Germany", "Italy", "Spain", "Japan", "China", "Brazil", "India",
+            "Canada", "Australia", "Mexico", "Argentina", "Egypt", "Turkey", "Greece", "Portugal",
+            "Netherlands", "Sweden", "Norway", "Finland", "Denmark", "Poland", "Ukraine", "Belarus",
+            "Kazakhstan", "United", "Britain", "England", "Scotland", "Wales", "Ireland", "Switzerland",
+            "Austria", "Belgium", "Hungary", "Romania", "Bulgaria", "Serbia", "Croatia", "Czech",
+            "Slovakia", "Slovenia", "Lithuania", "Latvia", "Estonia", "Iceland", "Israel", "Iran",
+            "Iraq", "Saudi", "Afghanistan", "Pakistan", "Indonesia", "Thailand", "Vietnam", "Korea",
+            "Taiwan", "Philippines", "Malaysia", "Singapore", "New", "Chile", "Colombia", "Peru",
+            "Venezuela", "South", "North", "European", "Soviet", "African",
+        ]
+        let cities = [
+            "Moscow", "London", "Paris", "Berlin", "Rome", "Madrid", "Tokyo", "Beijing", "Delhi",
+            "New", "Los", "Chicago", "San", "Boston", "Seattle", "Miami", "Denver", "Austin",
+            "Toronto", "Vancouver", "Montreal", "Sydney", "Melbourne", "Dubai", "Singapore",
+            "Hong", "Mumbai", "Seoul", "Bangkok", "Istanbul", "Cairo", "Lagos", "Nairobi",
+            "Amsterdam", "Vienna", "Prague", "Budapest", "Warsaw", "Kiev", "Minsk", "Stockholm",
+            "Oslo", "Helsinki", "Copenhagen", "Brussels", "Dublin", "Edinburgh", "Lisbon", "Athens",
+            "St", "Saint", "Barcelona", "Milan", "Munich", "Hamburg", "Venice", "Florence",
+            "Shanghai", "Jakarta", "Manila", "Kuala", "Rio", "Sao", "Buenos", "Lima", "Santiago",
+            "Jerusalem", "Tehran", "Baghdad", "Kabul", "Islamabad", "Dhaka", "Hanoi", "Taipei",
+            "Zurich", "Geneva", "Monaco", "Luxembourg", "Reykjavik", "Tallinn", "Riga", "Vilnius",
+            "Baku", "Tbilisi", "Yerevan", "Tashkent", "Almaty", "Nur", "Ashgabat", "Bishkek",
+            "Dushanbe", "Ulaanbaatar", "Kathmandu", "Colombo", "Karachi", "Alexandria", "Casablanca",
+            "Cape", "Johannesburg", "Havana", "Panama", "Quito", "Montevideo", "Asuncion",
+            "Yekaterinburg", "Novosibirsk", "Vladivostok", "Kazan", "Sochi", "Kaliningrad",
+        ]
+        let oceans = [
+            "Pacific", "Atlantic", "Indian", "Arctic", "Southern",
+        ]
+        let seas = [
+            "Mediterranean", "Caribbean", "Baltic", "Black", "Caspian", "Red", "Dead", "Aegean",
+            "Adriatic", "Ionian", "Tyrrhenian", "North", "Norwegian", "Barents", "White",
+            "Okhotsk", "Japan", "East", "South", "Yellow", "Philippine", "Coral", "Tasman",
+            "Arabian", "Bengal", "Andaman", "Java", "Banda", "Sulu", "Celebes", "Molucca",
+            "Labrador", "Beaufort", "Chukchi", "Sargasso", "Wadden", "Irish", "Celtic",
+        ]
+        let rivers = [
+            "Amazon", "Nile", "Mississippi", "Yangtze", "Yellow", "Mekong", "Ganges", "Indus",
+            "Volga", "Danube", "Rhine", "Seine", "Thames", "Loire", "Po", "Tiber", "Elbe",
+            "Oder", "Dnieper", "Don", "Ural", "Lena", "Yenisei", "Ob", "Amur", "Kolyma",
+            "Indigirka", "Mackenzie", "Yukon", "Colorado", "Columbia", "Ohio", "Missouri",
+            "Rio", "Parana", "Orinoco", "Congo", "Zambezi", "Niger", "Senegal", "Jordan",
+            "Tigris", "Euphrates", "Limpopo", "Murray", "Darling", "Lena", "Neva", "Moskva",
+            "Kama", "Angara", "Irtysh", "Sakarya", "Murrumbidgee",
+        ]
+        let lakes = [
+            "Baikal", "Superior", "Michigan", "Huron", "Erie", "Ontario", "Tanganyika",
+            "Victoria", "Malawi", "Chad", "Ladoga", "Onega", "Titicaca", "Nicaragua",
+            "Athabasca", "Great", "Salt", "Crater", "Como", "Garda", "Geneva", "Zurich",
+            "Lucerne", "Constance", "Balaton", "Plitvice", "Bled", "Laguna", "Maracaibo",
+            "Eyre", "Torrens", "Gairdner", "Winnipeg", "Wollaston", "Van", "Urmia",
+            "Issyk", "Aral", "Caspian", "Dead", "Tana", "Turkana", "Albert", "Edward",
+        ]
+        let mountains = [
+            "Everest", "Kilimanjaro", "Fuji", "Elbrus", "Mont", "Denali", "Matterhorn",
+            "Alps", "Andes", "Himalayas", "Rockies", "Urals", "Caucasus", "Carpathians",
+            "Pyrenees", "Apennines", "Alta", "Tien", "Pamir", "Hindu", "Karakoram",
+            "Himalaya", "Sierra", "Dolomites", "Olympus", "Parnassus", "Ararat", "Sinai",
+            "Zion", "Rainier", "Whitney", "Logan", "Aconcagua", "McKinley", "Vinson",
+        ]
+        let continents = [
+            "Africa", "Antarctica", "Asia", "Australia", "Europe", "North", "South",
+        ]
+        let misc = [
+            "January", "February", "March", "April", "May", "June", "July", "August",
+            "September", "October", "November", "December",
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+            "Christmas", "Easter", "Hanukkah", "Ramadan", "Diwali", "New", "Valentine",
+            "Halloween", "Thanksgiving", "Independence", "Victory",
+            "Islam", "Christianity", "Buddhism", "Hinduism", "Judaism", "Catholic",
+            "Orthodox", "Protestant", "Sunni", "Shia",
+            "English", "Russian", "Japanese", "Chinese", "Spanish", "French", "German",
+            "Italian", "Portuguese", "Arabic", "Hindi", "Bengali", "Dutch", "Swedish",
+            "Polish", "Ukrainian", "Turkish", "Korean", "Vietnamese", "Thai",
+        ]
+        return Set(names + countries + cities + oceans + seas + rivers + lakes + mountains + continents + misc)
+    }()
+
     func transformReplacement(_ string: String, range: NSRange, text: String) -> String {
         guard isPluginEnabled("autocapitalize"), string.count == 1,
               let first = string.first, first.isLetter, first.isLowercase
@@ -395,6 +485,14 @@ final class PluginManager {
         let trimmed = before.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty || trimmed.hasSuffix(".") || trimmed.hasSuffix("!") || trimmed.hasSuffix("?") {
             return first.uppercased()
+        }
+
+        // Check if current word matches a known proper noun
+        if let wordStart = before.range(of: "\\S+$", options: .regularExpression) {
+            let currentWord = String(before[wordStart]) + string
+            if properNouns.contains(currentWord) {
+                return first.uppercased()
+            }
         }
 
         return string

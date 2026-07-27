@@ -116,6 +116,7 @@ final class LocalizationManager {
 
             "About Ink": "О Ink",
             "Made with SwiftUI": "Сделано на SwiftUI",
+            "Author": "Автор",
         ],
 
         .japanese: [
@@ -207,6 +208,7 @@ final class LocalizationManager {
 
             "About Ink": "Inkについて",
             "Made with SwiftUI": "SwiftUIで制作",
+            "Author": "作者",
         ]
     ]
 

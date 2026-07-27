@@ -706,9 +706,9 @@ struct SettingsView: View {
             .padding(.vertical, 20)
 
             SettingsGroup(tr("Credits")) {
-                Text(tr("Ink is built with SwiftUI and AppKit."))
+                Text("\(tr("Author")): laguser")
                     .font(.caption).foregroundStyle(.secondary)
-                Text(tr("Sound synthesizer by Ink Engine."))
+                Text(tr("Ink is built with SwiftUI and AppKit."))
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
