@@ -19,10 +19,6 @@ final class AppSettings {
     var animationStyle: String { didSet { sync() } }
     var animationDuration: Double { didSet { sync() } }
 
-    // Donation
-    var donationLink: String { didSet { sync() } } // freeform URL or payment identifier
-
-
     static let shared = AppSettings()
 
     private init() {
@@ -41,7 +37,6 @@ final class AppSettings {
         clickNoise = d.object(forKey: "clickNoise") as? Double ?? 0.3
         animationStyle = d.string(forKey: "animationStyle") ?? "slide"
         animationDuration = d.object(forKey: "animationDuration") as? Double ?? 0.35
-        donationLink = d.string(forKey: "donationLink") ?? ""
     }
 
     private func sync() {
