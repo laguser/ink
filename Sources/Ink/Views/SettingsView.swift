@@ -730,7 +730,25 @@ struct SettingsView: View {
         .buttonStyle(.plain)
         .padding(.vertical, 4)
     }
+
+    private func loadRate() async {
+        guard !isFetchingRate else { return }
+        isFetchingRate = true
+        defer { isFetchingRate = false }
+        let url = URL(string: "https://api.exchangerate.host/latest?base=USD&symbols=RUB")!
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            if let json = try JSONSerialization.jsonObject(with: data) as? [String:Any],
+               let rates = json["rates"] as? [String:Any],
+               let rub = rates["RUB"] as? Double {
+                exchangeRate = rub
+            }
+        } catch {
+            // ignore
+        }
+    }
 }
+
 
 // MARK: – Reusable Components
 
